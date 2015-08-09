@@ -7,6 +7,6 @@ I initially started in codepen and realized how I didn't like the development en
 
 * [Link to Dropbox](https://dl.dropboxusercontent.com/u/1194073/webgl/index.html)
 
-## About weekly assignments
+## Weekly assignments
 
 Currently Week 1 and 2 are missing from this repository as I haven't had the time to move them from the codepen to this repository.
