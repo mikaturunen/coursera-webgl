@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "description": "Interactive Computer Graphics with WebGL, by Edward Angel",
   "main": "gulpfile.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikaturunen/coursera-webgl.git"
@@ -18,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/mikaturunen/coursera-webgl/issues"
   },
-  "homepage": "https://github.com/mikaturunen/coursera-webgl#readme"
+  "homepage": "https://github.com/mikaturunen/coursera-webgl#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.0"
+  }
 }
