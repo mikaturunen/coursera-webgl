@@ -1,0 +1,22 @@
+{
+  "name": "coursera-webgl-mikaturunen",
+  "version": "0.0.1",
+  "description": "Interactive Computer Graphics with WebGL, by Edward Angel",
+  "main": "gulpfile.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikaturunen/coursera-webgl.git"
+  },
+  "keywords": [
+    "webgl",
+    "coursera"
+  ],
+  "author": "Mika Turunen <mika.turunen@ymail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikaturunen/coursera-webgl/issues"
+  },
+  "homepage": "https://github.com/mikaturunen/coursera-webgl#readme"
+}
