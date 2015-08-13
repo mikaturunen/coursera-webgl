@@ -60,7 +60,7 @@
     };
 
     const utility = {
-        toWorldCoordinates = (p) => {
+        toWorldCoordinates: (p) => {
         	p[0] = 2 * p[0] / widthRatio - 1;
         	p[1] = 2 * (heightRatio - p[1]) / heightRatio - 1;
         }
