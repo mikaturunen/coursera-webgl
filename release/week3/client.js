@@ -162,7 +162,7 @@ var onMouseMove = function onMouseMove(x, y) {
  * @returns {boolean} true on success and false on failure.
  */
 var initializeWebGl = function initializeWebGl() {
-	var canvas = document.getElementById("gl-canvas");
+	var canvas = document.getElementById("webgl-canvas");
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) {
 		alert("WebGL isn't available");
