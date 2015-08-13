@@ -21,6 +21,8 @@
   ],
   "dependencies": {
     "react": "~0.13.3",
-    "react-bootstrap": "~0.24.3"
+    "react-bootstrap": "~0.24.3",
+    "jquery": "~2.1.4",
+    "lodash": "~3.10.1"
   }
 }
