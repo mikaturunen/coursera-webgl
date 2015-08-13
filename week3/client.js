@@ -39,7 +39,7 @@
             // Buffer for vertices
             const bufferId = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-            gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, utility.flattenVertices(vertices), gl.STATIC_DRAW);
             let vPosition = gl.getAttribLocation(program, "vPosition");
             gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(vPosition);
@@ -47,7 +47,7 @@
             // Buffer for vertice colors
             const colorBufferId = gl.createBuffer();
             gl.bindBuffer( gl.ARRAY_BUFFER, colorBufferId);
-            gl.bufferData( gl.ARRAY_BUFFER, flatten(verticeColors), gl.STATIC_DRAW );
+            gl.bufferData( gl.ARRAY_BUFFER, utility.flattenVertices(verticeColors), gl.STATIC_DRAW );
             let vColor = gl.getAttribLocation( program, "vColor" );
             gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(vColor);
@@ -63,6 +63,14 @@
         toWorldCoordinates: (p) => {
         	p[0] = 2 * p[0] / widthRatio - 1;
         	p[1] = 2 * (heightRatio - p[1]) / heightRatio - 1;
+        },
+
+        flattenVertices: (vertices) => {
+            // Single item in the vertices array is an array vecX === [x,y]
+            var floats = new Float32Array( vertices.length * 2 );
+            vertices.forEach((v, index) => { floats[index] = v; });
+            console.log(floats);
+            return floats;
         }
     };
 
@@ -74,12 +82,12 @@
     const createRectangle = (origin, size) => {
 
     	return [
-    		vec2(-size + origin[0], -size + origin[1]),
-    		vec2(-size + origin[0], size + origin[1]),
-    		vec2(size + origin[0], -size + origin[1]),
-    		vec2(size + origin[0], -size + origin[1]),
-    		vec2(size + origin[0], size + origin[1]),
-    		vec2(-size + origin[0], size + origin[1])
+    		vec2.fromValues(-size + origin[0], -size + origin[1]),
+    		vec2.fromValues(-size + origin[0], size + origin[1]),
+    		vec2.fromValues(size + origin[0], -size + origin[1]),
+    		vec2.fromValues(size + origin[0], -size + origin[1]),
+    		vec2.fromValues(size + origin[0], size + origin[1]),
+    		vec2.fromValues(-size + origin[0], size + origin[1])
     	];
     }
 
@@ -95,14 +103,14 @@
     	offset = $(canvas).offset();
 
         verticeColors = [
-            vec4(1,0,0,1),
-            vec4(1,0,0,1),
-            vec4(1,0,0,1),
-            vec4(1,0,0,1),
-            vec4(1,0,0,1),
-            vec4(1,0,0,1)
+            vec4.fromValues(1,0,0,1),
+            vec4.fromValues(1,0,0,1),
+            vec4.fromValues(1,0,0,1),
+            vec4.fromValues(1,0,0,1),
+            vec4.fromValues(1,0,0,1),
+            vec4.fromValues(1,0,0,1),
         ];
-        vertices = createRectangle(vec2(0,0), 0.5);
+        vertices = createRectangle(vec2.fromValues(0,0), 0.5);
 
     	renderer.sendToGpu(vertices, verticeColors);
     	renderer.render(vertices);
