@@ -1,106 +1,88 @@
 "use strict";
 
-(function () {
+var shaderProgram;
 
-    var gl = undefined;
-    var program = undefined;
-    var widthRatio = 0;
-    var heightRatio = 0;
-    var offset = { top: 0, left: 0 };
-    var positions = [];
-    var vertices = [];
-    var verticeUndoStart = [];
-    var verticeColors = [];
-    var activeColor = undefined;
-    var brushWidth = 1;
-    var mouseDownPosition = undefined;
-    var mouseUpPosition = undefined;
+function initShaders() {
+    var fragmentShader = getShader(gl, "shader-fragment");
+    var vertexShader = getShader(gl, "shader-vertex");
 
-    var renderer = {
-        initialize: function initialize(canvas) {
-            gl = WebGLUtils.setupWebGL(canvas);
-            if (!gl) {
-                alert("WebGL isn't available");
-                return false;
-            }
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
 
-            //  Configure WebGL
-            gl.viewport(0, 0, canvas.width, canvas.height);
-            gl.clearColor(1.0, 1.0, 1.0, 1.0);
-            //  Load shaders and initialize attribute buffers
-            program = initShaders(gl, "vertex-shader", "fragment-shader");
-            gl.useProgram(program);
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert("Could not initialise shaders");
+    }
 
-            return true;
-        },
+    gl.useProgram(shaderProgram);
 
-        sendToGpu: function sendToGpu(vertices, verticeColors) {
-            // Load the data into the GPU
-            // Buffer for vertices
-            var bufferId = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-            gl.bufferData(gl.ARRAY_BUFFER, utility.flattenVertices(vertices), gl.STATIC_DRAW);
-            var vPosition = gl.getAttribLocation(program, "vPosition");
-            gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(vPosition);
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-            // Buffer for vertice colors
-            var colorBufferId = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, colorBufferId);
-            gl.bufferData(gl.ARRAY_BUFFER, utility.flattenVertices(verticeColors), gl.STATIC_DRAW);
-            var vColor = gl.getAttribLocation(program, "vColor");
-            gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(vColor);
-        },
+    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
-        render: function render(vertices) {
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
-        }
-    };
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+}
 
-    var utility = {
-        toWorldCoordinates: function toWorldCoordinates(p) {
-            p[0] = 2 * p[0] / widthRatio - 1;
-            p[1] = 2 * (heightRatio - p[1]) / heightRatio - 1;
-        },
+var mvMatrixStack = [];
+var mvMatrix = mat4.create();
+var pMatrix = mat4.create();
 
-        flattenVertices: function flattenVertices(vertices) {
-            // Single item in the vertices array is an array vecX === [x,y]
-            var floats = new Float32Array(vertices.length * 2);
-            vertices.forEach(function (v, index) {
-                floats[index] = v;
-            });
-            console.log(floats);
-            return floats;
-        }
-    };
+function degToRad(degrees) {
+    return degrees * Math.PI / 180;
+}
 
-    /**
-     * Creates a simple rectangle around the given point. Point being the origin of the rectangle.
-     * @param {vec2} origin Rectangle origin
-     * @returns {vec2[]} Rectangle made from two triangles. Ready to be rendered with gl.TRIANGLES.
-     */
-    var createRectangle = function createRectangle(origin, size) {
+function initBuffers() {
+    createGeometry();
+}
 
-        return [vec2.fromValues(-size + origin[0], -size + origin[1]), vec2.fromValues(-size + origin[0], size + origin[1]), vec2.fromValues(size + origin[0], -size + origin[1]), vec2.fromValues(size + origin[0], -size + origin[1]), vec2.fromValues(size + origin[0], size + origin[1]), vec2.fromValues(-size + origin[0], size + origin[1])];
-    };
+var createGeometry = function createGeometry(a, b, c) {
+    allGeometry.push(new Pyramid());
+};
 
-    // Attaching a super simple event to the window onload event and going from there
-    window.onload = function () {
-        var canvas = document.getElementById("webgl-canvas");
-        if (!renderer.initialize(canvas)) {
-            return;
-        }
+var allGeometry = [];
 
-        widthRatio = $(canvas).width();
-        heightRatio = $(canvas).width();
-        offset = $(canvas).offset();
+function drawScene() {
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        verticeColors = [vec4.fromValues(1, 0, 0, 1), vec4.fromValues(1, 0, 0, 1), vec4.fromValues(1, 0, 0, 1), vec4.fromValues(1, 0, 0, 1), vec4.fromValues(1, 0, 0, 1), vec4.fromValues(1, 0, 0, 1)];
-        vertices = createRectangle(vec2.fromValues(0, 0), 0.5);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    // move camera back
+    mat4.identity(mvMatrix);
+    mat4.translate(mvMatrix, [0.0, 0.0, -10.0]);
 
-        renderer.sendToGpu(vertices, verticeColors);
-        renderer.render(vertices);
-    };
-})();
+    allGeometry.forEach(function (geometry) {
+        mvPushMatrix();
+        geometry.applyTranslation(mvMatrix);
+        geometry.applyOrientation(mvMatrix);
+        geometry.bindBuffers();
+        geometry.render(true);
+        mvPopMatrix();
+    });
+}
+
+var lastTime = 0;
+var animate = function animate() {
+    var timeNow = new Date().getTime();
+    if (lastTime != 0) {
+        var elapsed = timeNow - lastTime;
+        allGeometry.forEach(function (geometry) {
+            geometry.angle[1] += 2.0 * elapsed / 1000.0;
+            //geometry.angle[2] -= (7.5 * elapsed) / 1000.0;
+            geometry.orientation[1] = 1;
+        });
+    }
+
+    lastTime = timeNow;
+};
+
+var tick = function tick() {
+    requestAnimFrame(tick);
+    drawScene();
+    animate();
+};
+
+window.onload = webGLStart;

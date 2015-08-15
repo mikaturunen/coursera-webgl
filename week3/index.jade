@@ -17,31 +17,50 @@ html(lang="en")
         
         script(src="/u/1194073/webgl/external/manual/initShaders.js")
         script(src="/u/1194073/webgl/external/manual/webgl-utils.js")
-
-        // Project scripts
-        script(src="/u/1194073/webgl/release/week3/client.js")
+        script(src="/u/1194073/webgl/external/manual/glMatrix-0.9.5.min.js")
       
-        script(id="vertex-shader" type="x-shader/x-vertex").
-          	attribute vec4 vPosition;
-          	attribute vec4 vColor;
-          	varying vec4 fColor;
-          
-          	void main() {
-          		 gl_Position = vPosition;
-          		 fColor = vColor;
-          	}    
+        script(id="shader-vertex" type="x-shader/x-vertex").
+            attribute vec3 aVertexPosition;
+            attribute vec4 aVertexColor;
+            uniform mat4 uMVMatrix;
+            uniform mat4 uPMatrix;
+            varying vec4 vColor;
+            void main(void) {
+               gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+               vColor = aVertexColor;
+            }
+                    
+        script(id="shader-fragment" type="x-shader/x-fragment").        
+            precision mediump float;
+            varying vec4 vColor;
+            void main(void) {
+               gl_FragColor = vColor;
+            }
             
-        script(id="fragment-shader" type="x-shader/x-fragment").
-          	precision mediump float;
-          
-          	varying vec4 fColor;
-          	void main() {
-          		 gl_FragColor = fColor;
-          	}
+        // Project scripts
+        script(src="/u/1194073/webgl/release/week3/common.js")
+        script(src="/u/1194073/webgl/release/week3/client.js")
 
     body
         div
-        div
-        div
-        div
-            canvas(id="webgl-canvas" style="width:500px;height:500px;")
+            canvas(id="webgl-canvas" style="border: none;" width="500" height="500")
+        div 
+            label(for="objectList") Create geometry:
+            select(id="objectList" value="")
+                option(value="sphere") Sphere
+                option(value="cone") Cone
+                option(value="cylinder") Cylinder
+            
+            label(for="activeList") Select active geometry:
+            select(id="activeList")
+        
+            span Move geometry
+            label(for="xPosition") X-axis
+            input(id="xPosition" type="range")
+            label(for="yPosition") Y-axis
+            input(id="yPosition" type="range")
+            label(for="zPosition") Z-axis    
+            input(id="zPosition" type="range")
+                    
+            button Remove active geometry
+                
